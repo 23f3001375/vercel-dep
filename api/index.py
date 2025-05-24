@@ -18,6 +18,7 @@ students = []
 with open(CSV_PATH, newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
+        # Convert studentId to int
         students.append({
             "studentId": int(row["studentId"]),
             "class": row["class"]
@@ -25,9 +26,12 @@ with open(CSV_PATH, newline='') as csvfile:
 
 @app.get("/api")
 def get_students(request: Request):
-    classes = request.query_params.getlist("class")
+    classes = request.query_params.getlist("class")  # get all class filters
+    
     if classes:
-        filtered = [s for s in students if s["class"] in classes]
+        # Filter students by class but keep original order
+        filtered_students = [s for s in students if s["class"] in classes]
     else:
-        filtered = students
-    return {"students": filtered}
+        filtered_students = students
+    
+    return {"students": filtered_students}
