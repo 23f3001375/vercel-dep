@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import json
+import os
 
 app = FastAPI()
 
-# Enable CORS for all origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -12,8 +12,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load marks from file once
-with open("marks.json") as f:
+with open(os.path.join(os.path.dirname(__file__), "marks.json")) as f:
     data = json.load(f)
 
 @app.get("/api")
