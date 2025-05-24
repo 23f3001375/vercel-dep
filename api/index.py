@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import csv
+import os
 
 app = FastAPI()
 
@@ -11,12 +12,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-students = []
+CSV_PATH = os.path.join(os.path.dirname(__file__), 'students.csv')
 
-with open('students.csv', newline='') as csvfile:
+students = []
+with open(CSV_PATH, newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        # Make sure studentId is int and class is exact string from CSV
         students.append({
             "studentId": int(row["studentId"]),
             "class": row["class"]
