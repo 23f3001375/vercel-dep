@@ -8,20 +8,27 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["*"],
+    allow_methods=["GET"],
     allow_headers=["*"],
 )
 
-students = []
+students_data = []
 
 with open("students.csv", newline="") as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        students.append(row)
+        students_data.append(row)
 
-@app.get("/students")
-def get_students(class_filter: str | None = Query(None, alias="class")):
+@app.get("/api")
+def get_students(class_filter: list[str] | None = Query(None, alias="class")):
     if class_filter:
-        filtered = [s for s in students if s["class"] == class_filter]
-        return JSONResponse(content=filtered)
-    return JSONResponse(content=students)
+        filtered_students = [
+            student for student in students_data if student["class"] in class_filter
+        ]
+        return JSONResponse(content={"students": filtered_students})
+    return JSONResponse(content={"students": students_data})
+
+# To run this, save it as a Python file (e.g., main.py)
+# and then run using uvicorn: uvicorn main:app --reload
+
+# The API endpoint URL will be http://127.0.0.1:8000/api
