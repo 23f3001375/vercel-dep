@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import csv
+from typing import List
 
 app = FastAPI()
 
@@ -14,13 +15,17 @@ app.add_middleware(
 
 students_data = []
 
-with open("students.csv", newline="") as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        students_data.append(row)
+try:
+    with open("students.csv", newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            students_data.append(row)
+except FileNotFoundError:
+    print("Error: students.csv not found. Please make sure it is in the same directory.")
+    students_data = []
 
 @app.get("/api")
-def get_students(class_filter: list[str] | None = Query(None, alias="class")):
+def get_students(class_filter: List[str] | None = Query(None, alias="class")):
     if class_filter:
         filtered_students = [
             student for student in students_data if student["class"] in class_filter
