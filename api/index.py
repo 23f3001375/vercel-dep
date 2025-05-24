@@ -1,37 +1,27 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Query
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import csv
-import os
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
-CSV_PATH = os.path.join(os.path.dirname(__file__), 'students.csv')
-
 students = []
-with open(CSV_PATH, newline='') as csvfile:
+
+with open("students.csv", newline="") as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        # Convert studentId to int
-        students.append({
-            "studentId": int(row["studentId"]),
-            "class": row["class"]
-        })
+        students.append(row)
 
-@app.get("/api")
-def get_students(request: Request):
-    classes = request.query_params.getlist("class")  # get all class filters
-    
-    if classes:
-        # Filter students by class but keep original order
-        filtered_students = [s for s in students if s["class"] in classes]
-    else:
-        filtered_students = students
-    
-    return {"students": filtered_students}
+@app.get("/students")
+def get_students(class_filter: str | None = Query(None, alias="class")):
+    if class_filter:
+        filtered = [s for s in students if s["class"] == class_filter]
+        return JSONResponse(content=filtered)
+    return JSONResponse(content=students)
